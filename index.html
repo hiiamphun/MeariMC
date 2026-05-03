@@ -3,754 +3,515 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thanh Toán — Nạp Thẻ</title>
+<title>MeariMC — Nạp Xu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg:        #0b0f1a;
-    --surface:   #111827;
-    --surface2:  #1a2235;
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(255,255,255,0.14);
-    --blue:      #3b82f6;
-    --blue-glow: rgba(59,130,246,0.25);
-    --teal:      #06b6d4;
-    --green:     #22c55e;
-    --red:       #ef4444;
-    --text:      #f1f5f9;
-    --muted:     #94a3b8;
-    --dim:       #475569;
-    --radius:    16px;
-    --radius-sm: 10px;
-  }
+:root {
+  --sky:        #6ba3e0;
+  --grass:      #5d9e38;
+  --grass-dark: #3d7a1e;
+  --dirt:       #8b6340;
+  --stone:      #808080;
+  --stone-dark: #5a5a5a;
+  --wood:       #9f7a3b;
+  --gold:       #f5c518;
+  --emerald:    #17c93c;
+  --diamond:    #5de0e6;
+  --lava:       #e8620a;
+  --text-main:  #ffffff;
+}
 
-  body {
-    font-family: 'Be Vietnam Pro', sans-serif;
-    background: var(--bg);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-    color: var(--text);
-    overflow-x: hidden;
-  }
+body {
+  font-family: 'Press Start 2P', monospace;
+  background: linear-gradient(180deg, #6ba3e0 0%, #8dc8f5 60%, #a8d8fa 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 0 40px;
+  color: var(--text-main);
+  overflow-x: hidden;
+}
 
-  /* animated grid background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-  }
+/* ─ SKY ─ */
+.sky-bg {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, #5b8dd9 0%, #8dc8f5 70%, #c0e8ff 100%);
+  z-index: -3;
+}
 
-  /* glowing blob */
-  body::after {
-    content: '';
-    position: fixed;
-    top: -20%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 700px;
-    height: 400px;
-    background: radial-gradient(ellipse, rgba(59,130,246,0.12) 0%, transparent 70%);
-    pointer-events: none;
-  }
+/* clouds */
+.cloud { position: fixed; background: white; z-index: -2; opacity: 0.88; image-rendering: pixelated; }
+.cloud::before { content:''; position:absolute; background:white; }
+.cloud-1 { width:80px;height:24px;top:10%;left:-100px;animation:fc 40s linear infinite; }
+.cloud-1::before { width:40px;height:16px;top:-16px;left:16px; }
+.cloud-2 { width:64px;height:20px;top:22%;left:-80px;animation:fc 56s linear 14s infinite; }
+.cloud-2::before { width:32px;height:14px;top:-14px;left:10px; }
+.cloud-3 { width:96px;height:28px;top:6%;left:-120px;animation:fc 48s linear 28s infinite; }
+.cloud-3::before { width:48px;height:20px;top:-20px;left:20px; }
+@keyframes fc { from{left:-150px} to{left:110%} }
 
-  /* ─── header bar ─── */
-  .topbar {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 56px;
-    background: rgba(11,15,26,0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    z-index: 10;
-  }
+/* falling blocks */
+.fall-block {
+  position: fixed;
+  image-rendering: pixelated;
+  opacity: 0.15;
+  animation: fall linear infinite;
+  z-index: -1;
+}
+@keyframes fall {
+  from { transform: translateY(-20px) rotate(0deg); }
+  to   { transform: translateY(110vh) rotate(360deg); }
+}
 
-  .topbar-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: -0.3px;
-  }
+/* ─ TOPBAR ─ */
+.topbar {
+  width: 100%;
+  background: var(--stone-dark);
+  border-bottom: 4px solid #1a1a1a;
+  box-shadow: inset 0 2px 0 #787878, inset 0 -2px 0 #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 54px;
+  flex-shrink: 0;
+}
 
-  .topbar-brand .dot {
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--blue), var(--teal));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+.brand { display: flex; align-items: center; gap: 10px; }
 
-  .topbar-brand .dot svg { width: 14px; height: 14px; }
+.block-icon { width:32px; height:32px; image-rendering: pixelated; position:relative; flex-shrink:0; }
+.block-top  { position:absolute; width:100%; height:50%; top:0; background:var(--grass); border-bottom:2px solid var(--grass-dark); }
+.block-side { position:absolute; width:100%; height:50%; bottom:0; background:var(--dirt); }
+.block-top::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(90deg,rgba(255,255,255,0.1) 0 2px,transparent 2px 4px); }
 
-  .secure-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--green);
-    font-weight: 500;
-  }
+.brand-name { font-size:12px; color:var(--emerald); text-shadow:2px 2px 0 #003010; letter-spacing:1px; }
+.brand-sub  { font-size:5px; color:#a0a0a0; display:block; margin-top:4px; text-shadow:1px 1px 0 #000; }
 
-  .secure-badge .lock-icon {
-    width: 14px; height: 14px;
-  }
+.secure-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: #162816;
+  border: 2px solid;
+  border-color: var(--emerald) #0a2010 #0a2010 var(--emerald);
+  padding: 5px 10px;
+  font-size: 6px;
+  color: var(--emerald);
+  text-shadow: 1px 1px 0 #000;
+}
+.secure-dot { width:6px;height:6px;background:var(--emerald);animation:blink 1.5s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-  /* ─── main card ─── */
-  .card {
-    position: relative;
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    width: 100%;
-    max-width: 440px;
-    padding: 32px;
-    margin-top: 56px;
-    animation: cardIn 0.5s ease both;
-  }
+/* ─ GRASS STRIP ─ */
+.grass-strip {
+  width: 100%;
+  height: 32px;
+  background: var(--grass);
+  border-bottom: 8px solid var(--grass-dark);
+  border-top: 0;
+  flex-shrink: 0;
+  position: relative;
+}
+.grass-strip::before {
+  content:''; position:absolute; top:-8px; left:0; right:0; height:8px;
+  background: repeating-linear-gradient(90deg,var(--grass) 0 8px,transparent 8px 16px);
+}
 
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+/* ─ MAIN ─ */
+.main { width:100%; max-width:460px; padding:20px 16px; display:flex; flex-direction:column; gap:10px; }
 
-  /* ─── steps ─── */
-  .steps {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    margin-bottom: 28px;
-  }
+/* ─ MC PANEL ─ */
+.mc-panel {
+  background: #c6c6c6;
+  border: 3px solid;
+  border-color: #fff #555 #555 #fff;
+  outline: 3px solid #000;
+  padding: 14px 16px;
+  animation: slideIn 0.35s ease both;
+}
+.mc-panel.dark  { background:#2a2a2a; border-color:#666 #111 #111 #666; }
+.mc-panel.stone { background:#6e6e6e; border-color:#999 #333 #333 #999; }
+.mc-panel.deep  { background:#111827; border-color:#3a3a5a #05050f #05050f #3a3a5a; }
+.mc-panel.wood  {
+  background: repeating-linear-gradient(180deg,#a07840 0 8px,#8b6730 8px 16px);
+  border-color: #c8a060 #4a2a00 #4a2a00 #c8a060;
+}
 
-  .step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
+@keyframes slideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
-  .step-num {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    transition: all 0.3s;
-  }
+/* ─ SECTION LABEL ─ */
+.slabel {
+  font-size: 6px; color: #3a3a3a; text-shadow: 1px 1px 0 rgba(255,255,255,.5);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.slabel-dark { color: #888; text-shadow: 1px 1px 0 #000; }
+.slabel::before {
+  content:''; display:inline-block; width:8px; height:8px;
+  background:var(--diamond); box-shadow:1px 1px 0 #1a7a80; flex-shrink:0;
+}
 
-  .step.active .step-num {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #fff;
-    box-shadow: 0 0 0 4px var(--blue-glow);
-  }
+/* ─ STEPS ─ */
+.steps-row { display:flex; align-items:center; gap:0; }
+.xp-step  { display:flex; flex-direction:column; align-items:center; gap:5px; flex:1; }
+.xp-num {
+  width:26px; height:26px; background:#444;
+  border:2px solid; border-color:#777 #222 #222 #777;
+  display:flex; align-items:center; justify-content:center;
+  font-size:8px; color:#888; text-shadow:1px 1px 0 #000;
+}
+.xp-step.done   .xp-num { background:var(--emerald); border-color:#8ae88a #003a10 #003a10 #8ae88a; color:#fff; }
+.xp-step.active .xp-num { background:var(--gold);    border-color:#ffe060 #5a3a00 #5a3a00 #ffe060; color:#1a1a1a; }
+.xp-lbl { font-size:5px; color:#666; text-shadow:1px 1px 0 #000; white-space:nowrap; }
+.xp-step.done   .xp-lbl { color:var(--emerald); }
+.xp-step.active .xp-lbl { color:var(--gold); }
+.xp-line { flex:1; height:2px; background:#444; max-width:40px; margin-bottom:14px; }
 
-  .step.done .step-num {
-    background: var(--green);
-    border-color: var(--green);
-    color: #fff;
-  }
+/* ─ AMOUNT PANEL ─ */
+.amount-row-inner { display:flex; justify-content:space-between; align-items:center; }
+.amt-tag  { font-size:6px; color:#6a6aaa; text-shadow:1px 1px 0 #000; margin-bottom:8px; }
+.amt-num-row { display:flex; align-items:center; gap:8px; }
 
-  .step-label {
-    font-size: 11px;
-    color: var(--dim);
-    white-space: nowrap;
-  }
-  .step.active .step-label { color: var(--blue); }
-  .step.done  .step-label { color: var(--green); }
+.gem-svg { width:16px; height:16px; image-rendering:pixelated; flex-shrink:0; }
 
-  .step-line {
-    flex: 1;
-    height: 1px;
-    background: var(--border2);
-    min-width: 28px;
-    max-width: 48px;
-    margin-bottom: 18px;
-  }
+.amt-num  { font-size:18px; color:var(--emerald); text-shadow:2px 2px 0 #002a10; letter-spacing:-1px; }
+.amt-unit { font-size:6px;  color:#5a9a5a; text-shadow:1px 1px 0 #001a08; align-self:flex-end; margin-bottom:3px; }
 
-  /* ─── amount block ─── */
-  .amount-block {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    animation: cardIn 0.5s 0.1s ease both;
-  }
+.status-box {
+  background:#2a1a00;
+  border:2px solid; border-color:var(--gold) #5a3a00 #5a3a00 var(--gold);
+  padding:6px 10px; display:flex; align-items:center; gap:5px;
+  font-size:6px; color:var(--gold); text-shadow:1px 1px 0 #000;
+}
+.status-dot { width:6px; height:6px; background:var(--gold); animation:blink 0.8s step-end infinite; }
 
-  .amount-label {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-  }
+/* ─ TIMER ─ */
+.timer-wrap { display:flex; align-items:center; gap:10px; }
+.timer-lbl  { font-size:6px; color:#888; text-shadow:1px 1px 0 #000; white-space:nowrap; }
+.timer-track {
+  flex:1; height:14px; background:#0a0a0a;
+  border:2px solid #333; position:relative; overflow:hidden;
+}
+.timer-fill {
+  position:absolute; top:0; left:0; bottom:0;
+  background:var(--emerald); width:100%; transform-origin:left;
+  animation:tshrink 300s linear forwards;
+}
+.timer-fill::after {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.18) 0 4px,transparent 4px 8px);
+}
+@keyframes tshrink { from{transform:scaleX(1)} to{transform:scaleX(0)} }
+.timer-fill.urgent { background:var(--lava); }
+.timer-num  { font-size:8px; color:var(--emerald); text-shadow:2px 2px 0 #002a10; min-width:46px; text-align:right; }
+.timer-num.urgent { color:var(--lava); text-shadow:2px 2px 0 #4a0000; }
 
-  .amount-value {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 26px;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: -1px;
-  }
+/* ─ QR PANEL ─ */
+.qr-inner {
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  position:relative;
+}
+.qr-inner::before, .qr-inner::after {
+  content:''; position:absolute; width:36px; height:36px; border-style:solid; border-color:var(--diamond);
+}
+.qr-inner::before { top:0; left:0; border-width:3px 0 0 3px; }
+.qr-inner::after  { bottom:0; right:0; border-width:0 3px 3px 0; }
 
-  .amount-currency {
-    font-size: 14px;
-    color: var(--muted);
-    margin-left: 4px;
-    font-family: 'Be Vietnam Pro', sans-serif;
-    font-weight: 400;
-  }
+.bank-tag {
+  background:#0a1a2a;
+  border:2px solid; border-color:var(--diamond) #0a4050 #0a4050 var(--diamond);
+  padding:5px 12px; font-size:6px; color:var(--diamond); text-shadow:1px 1px 0 #000;
+  display:flex; align-items:center; gap:8px;
+}
+.bank-chip { background:var(--diamond); color:#001a1a; padding:2px 6px; font-size:6px; text-shadow:none; }
 
-  .amount-status {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-  }
+.qr-frame {
+  padding:10px;
+  background:repeating-linear-gradient(180deg,#a07840 0 8px,#8b6730 8px 16px);
+  border:3px solid; border-color:#c8a060 #4a2a00 #4a2a00 #c8a060;
+  outline:3px solid #000;
+  position:relative; overflow:hidden;
+}
+.qr-frame img { display:block; width:180px; height:180px; image-rendering:pixelated; border:4px solid #fff; }
 
-  .status-pill {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-  }
+.scan-line {
+  position:absolute; left:10px; right:10px; height:3px;
+  background:var(--diamond); opacity:.85;
+  animation:scanqr 2.5s ease-in-out infinite;
+  box-shadow:0 0 6px var(--diamond);
+}
+@keyframes scanqr {
+  0%   { top:10px;              opacity:0; }
+  10%  { opacity:.85; }
+  90%  { opacity:.85; }
+  100% { top:calc(100% - 13px); opacity:0; }
+}
 
-  .status-pill.waiting {
-    background: rgba(234,179,8,0.12);
-    color: #eab308;
-    border: 1px solid rgba(234,179,8,0.2);
-  }
+.qr-hint { font-size:6px; color:#888; text-shadow:1px 1px 0 #000; text-align:center; line-height:2; }
 
-  .status-pill .pulse-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #eab308;
-    animation: pulse 1.5s ease infinite;
-  }
+/* ─ INFO ROWS ─ */
+.info-rows { overflow:hidden; }
+.irow { display:flex; align-items:center; padding:10px 14px; gap:8px; border-bottom:2px solid #1a1a1a; }
+.irow:last-child { border-bottom:none; }
+.ikey { font-size:6px; color:#777; text-shadow:1px 1px 0 #000; white-space:nowrap; min-width:84px; flex-shrink:0; }
+.ival { font-size:7px; color:#e0e0e0; text-shadow:1px 1px 0 #000; flex:1; word-break:break-all; line-height:1.6; }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%       { opacity: 0.4; transform: scale(0.7); }
-  }
+.mc-btn {
+  background:#c6c6c6; border:2px solid; border-color:#fff #555 #555 #fff;
+  padding:5px 10px; font-family:'Press Start 2P',monospace; font-size:6px;
+  color:#1a1a1a; cursor:pointer; text-shadow:none; white-space:nowrap; flex-shrink:0;
+}
+.mc-btn:hover { background:#d8d8d8; }
+.mc-btn:active { background:#aaa; border-color:#444 #ccc #ccc #444; transform:translate(1px,1px); }
+.mc-btn.copied { background:#1a3a1a; border-color:#5ae85a #002a00 #002a00 #5ae85a; color:var(--emerald); }
 
-  /* ─── timer ─── */
-  .timer-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--dim);
-    margin-bottom: 20px;
-    padding: 0 2px;
-    animation: cardIn 0.5s 0.15s ease both;
-  }
+/* ─ WARNING ─ */
+.warn-inner { display:flex; gap:10px; align-items:flex-start; }
+.tnt { font-size:22px; flex-shrink:0; animation:tntb 1.8s ease infinite; }
+@keyframes tntb { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.6)} }
+.warn-txt { font-size:6px; color:#cca040; text-shadow:1px 1px 0 #000; line-height:2.2; }
+.warn-txt strong { color:var(--gold); }
 
-  .timer-value {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 600;
-  }
+/* ─ FOOT ─ */
+.card-foot { text-align:center; font-size:6px; color:#666; text-shadow:1px 1px 0 #000; }
 
-  .timer-value.urgent { color: var(--red); }
+/* ─ ERROR ─ */
+.error-state {
+  display:none; flex-direction:column; align-items:center; gap:14px;
+  text-align:center; padding:28px 20px;
+  background:#2a0a0a;
+  border:3px solid; border-color:var(--lava) #3a0000 #3a0000 var(--lava);
+  outline:3px solid #000;
+  animation:slideIn .3s ease both;
+}
+.creeper { font-size:40px; animation:cf 1s step-end infinite; }
+@keyframes cf { 0%,100%{opacity:1} 50%{opacity:.5} }
+.err-title { font-size:11px; color:var(--lava); text-shadow:2px 2px 0 #3a0000; }
+.err-msg   { font-size:7px; color:#cc8888; text-shadow:1px 1px 0 #000; line-height:2; }
 
-  .timer-bar-wrap {
-    flex: 1;
-    height: 3px;
-    background: var(--surface2);
-    border-radius: 99px;
-    margin: 0 12px;
-    overflow: hidden;
-  }
-
-  .timer-bar {
-    height: 100%;
-    border-radius: 99px;
-    background: linear-gradient(90deg, var(--blue), var(--teal));
-    width: 100%;
-    transform-origin: left;
-    animation: shrink 300s linear forwards;
-  }
-
-  @keyframes shrink {
-    from { transform: scaleX(1); }
-    to   { transform: scaleX(0); }
-  }
-
-  /* ─── QR wrapper ─── */
-  .qr-wrap {
-    position: relative;
-    border-radius: var(--radius);
-    padding: 20px;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
-    animation: cardIn 0.5s 0.2s ease both;
-    overflow: hidden;
-  }
-
-  /* corner accents */
-  .qr-wrap::before,
-  .qr-wrap::after {
-    content: '';
-    position: absolute;
-    width: 40px; height: 40px;
-    border-color: var(--blue);
-    border-style: solid;
-  }
-  .qr-wrap::before {
-    top: 10px; left: 10px;
-    border-width: 2px 0 0 2px;
-    border-radius: 4px 0 0 0;
-  }
-  .qr-wrap::after {
-    bottom: 10px; right: 10px;
-    border-width: 0 2px 2px 0;
-    border-radius: 0 0 4px 0;
-  }
-
-  .qr-bank-tag {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(59,130,246,0.1);
-    border: 1px solid rgba(59,130,246,0.2);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--blue);
-    letter-spacing: 0.4px;
-  }
-
-  .qr-bank-tag .bank-icon {
-    width: 18px; height: 18px;
-    border-radius: 4px;
-    background: var(--blue);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 700;
-    color: #fff;
-  }
-
-  .qr-img-frame {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 3px solid #fff;
-    box-shadow: 0 0 0 1px var(--border2), 0 8px 32px rgba(0,0,0,0.4);
-  }
-
-  .qr-img-frame img {
-    display: block;
-    width: 200px;
-    height: 200px;
-    object-fit: contain;
-  }
-
-  /* scan line animation */
-  .qr-img-frame::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--blue), transparent);
-    animation: scan 2.5s ease-in-out infinite;
-    top: 0;
-  }
-
-  @keyframes scan {
-    0%   { top: 0%; opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 1; }
-    100% { top: 100%; opacity: 0; }
-  }
-
-  .qr-hint {
-    font-size: 12px;
-    color: var(--dim);
-    text-align: center;
-  }
-
-  /* ─── info rows ─── */
-  .info-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    margin-bottom: 20px;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    border: 1px solid var(--border);
-    animation: cardIn 0.5s 0.25s ease both;
-  }
-
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    gap: 16px;
-  }
-
-  .info-row:last-child { border-bottom: none; }
-
-  .info-key {
-    font-size: 12px;
-    color: var(--muted);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .info-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: var(--text);
-    font-weight: 600;
-    text-align: right;
-    word-break: break-all;
-  }
-
-  .copy-btn {
-    background: none;
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    color: var(--muted);
-    padding: 3px 8px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-    font-family: 'Be Vietnam Pro', sans-serif;
-    flex-shrink: 0;
-  }
-
-  .copy-btn:hover {
-    border-color: var(--blue);
-    color: var(--blue);
-  }
-  .copy-btn.copied {
-    border-color: var(--green);
-    color: var(--green);
-  }
-
-  /* ─── notice ─── */
-  .notice {
-    display: flex;
-    gap: 10px;
-    background: rgba(234,179,8,0.06);
-    border: 1px solid rgba(234,179,8,0.15);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
-    margin-bottom: 24px;
-    animation: cardIn 0.5s 0.3s ease both;
-  }
-
-  .notice-icon {
-    font-size: 14px;
-    flex-shrink: 0;
-    margin-top: 1px;
-    color: #eab308;
-  }
-
-  .notice p {
-    font-size: 12px;
-    color: #ca8a04;
-    line-height: 1.6;
-  }
-
-  .notice p b {
-    color: #eab308;
-    font-weight: 600;
-  }
-
-  /* ─── footer inside card ─── */
-  .card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--dim);
-    animation: cardIn 0.5s 0.35s ease both;
-  }
-
-  .card-footer .sep { opacity: 0.4; }
-
-  /* ─── error state ─── */
-  .error-state {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    padding: 20px 0;
-    text-align: center;
-  }
-
-  .error-icon {
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-  }
-
-  .error-state h3 {
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .error-state p {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  /* ─── branding below card ─── */
-  .bottom-note {
-    margin-top: 20px;
-    font-size: 11px;
-    color: var(--dim);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    animation: cardIn 0.5s 0.4s ease both;
-  }
-
-  .bottom-note a { color: var(--blue); text-decoration: none; }
-
-  @media (max-width: 480px) {
-    .card { padding: 24px 20px; }
-    .amount-value { font-size: 22px; }
-  }
+/* ─ BOTTOM ─ */
+.btm { margin-top:4px; font-size:6px; color:rgba(255,255,255,.65); text-shadow:1px 1px 0 rgba(0,0,0,.6); display:flex; gap:8px; padding-bottom:12px; }
+.btm a { color:var(--emerald); text-decoration:none; }
 </style>
 </head>
 <body>
 
-<!-- topbar -->
+<div class="sky-bg"></div>
+<div class="cloud cloud-1"></div>
+<div class="cloud cloud-2"></div>
+<div class="cloud cloud-3"></div>
+<div id="blocks-bg"></div>
+
+<!-- TOPBAR -->
 <header class="topbar">
-  <div class="topbar-brand">
-    <div class="dot">
-      <svg viewBox="0 0 14 14" fill="none">
-        <path d="M7 1L12.196 4V10L7 13L1.804 10V4L7 1Z" fill="white" fill-opacity="0.9"/>
-      </svg>
+  <div class="brand">
+    <div class="block-icon"><div class="block-top"></div><div class="block-side"></div></div>
+    <div>
+      <span class="brand-name">MeariMC</span>
+      <span class="brand-sub">SERVER PAYMENT PORTAL</span>
     </div>
-    Cổng Thanh Toán
   </div>
-  <div class="secure-badge">
-    <svg class="lock-icon" viewBox="0 0 16 16" fill="none">
-      <rect x="3" y="7" width="10" height="8" rx="2" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="1.2"/>
-      <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-    </svg>
-    Kết nối bảo mật
+  <div class="secure-pill">
+    <div class="secure-dot"></div>
+    SECURED
   </div>
 </header>
 
-<!-- main card -->
-<div class="card">
+<!-- GRASS -->
+<div class="grass-strip"></div>
 
-  <!-- steps -->
-  <div class="steps">
-    <div class="step done">
-      <div class="step-num">✓</div>
-      <div class="step-label">Tạo lệnh</div>
-    </div>
-    <div class="step-line"></div>
-    <div class="step active">
-      <div class="step-num">2</div>
-      <div class="step-label">Thanh toán</div>
-    </div>
-    <div class="step-line"></div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-label">Nhận Xu</div>
+<div class="main">
+
+  <!-- STEPS -->
+  <div class="mc-panel dark" style="animation-delay:.02s">
+    <div class="slabel slabel-dark">Tiến trình giao dịch</div>
+    <div class="steps-row">
+      <div class="xp-step done">
+        <div class="xp-num">&#10003;</div>
+        <div class="xp-lbl">Tạo lệnh</div>
+      </div>
+      <div class="xp-line"></div>
+      <div class="xp-step active">
+        <div class="xp-num">2</div>
+        <div class="xp-lbl">Thanh toán</div>
+      </div>
+      <div class="xp-line"></div>
+      <div class="xp-step">
+        <div class="xp-num">3</div>
+        <div class="xp-lbl">Nhận Xu</div>
+      </div>
     </div>
   </div>
 
-  <!-- error state (hidden by default) -->
+  <!-- ERROR -->
   <div class="error-state" id="error-state">
-    <div class="error-icon">⚠</div>
-    <h3>Giao dịch không hợp lệ</h3>
-    <p>Không tìm thấy thông tin giao dịch.<br>Vui lòng tạo lại mã nạp thẻ trong game.</p>
+    <div class="creeper">&#128124;</div>
+    <div class="err-title">CREEPER ALERT!</div>
+    <div class="err-msg">Không tìm thấy thông tin giao dịch.<br>Vui lòng tạo lại lệnh trong game.</div>
   </div>
 
-  <!-- payment content -->
+  <!-- PAYMENT CONTENT -->
   <div id="payment-content">
 
-    <!-- amount -->
-    <div class="amount-block">
-      <div>
-        <div class="amount-label">Số tiền nạp</div>
-        <div class="amount-value">
-          <span id="amount-text">—</span><span class="amount-currency">đ</span>
+    <!-- AMOUNT -->
+    <div class="mc-panel deep" style="animation-delay:.06s">
+      <div class="amount-row-inner">
+        <div>
+          <div class="amt-tag">&#9830; SỐ TIỀN NẠP VÀO SERVER</div>
+          <div class="amt-num-row">
+            <svg class="gem-svg" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="0" width="6" height="2" fill="#17c93c"/>
+              <rect x="3" y="2" width="2" height="2" fill="#17c93c"/>
+              <rect x="11" y="2" width="2" height="2" fill="#17c93c"/>
+              <rect x="2" y="4" width="1" height="2" fill="#0da02e"/>
+              <rect x="13" y="4" width="1" height="2" fill="#0da02e"/>
+              <rect x="2" y="6" width="12" height="1" fill="#17c93c"/>
+              <rect x="3" y="7" width="10" height="3" fill="#5effa0"/>
+              <rect x="4" y="10" width="8" height="2" fill="#17c93c"/>
+              <rect x="5" y="12" width="6" height="2" fill="#0da02e"/>
+              <rect x="6" y="14" width="4" height="2" fill="#075518"/>
+            </svg>
+            <span class="amt-num" id="amount-text">—</span>
+            <span class="amt-unit">VNĐ</span>
+          </div>
+        </div>
+        <div class="status-box">
+          <div class="status-dot"></div>
+          CHỜ THANH TOÁN
         </div>
       </div>
-      <div class="amount-status">
-        <div class="status-pill waiting">
-          <div class="pulse-dot"></div>
-          Chờ thanh toán
+    </div>
+
+    <!-- TIMER -->
+    <div class="mc-panel dark" style="animation-delay:.1s">
+      <div class="timer-wrap">
+        <div class="timer-lbl">HẾT HẠN</div>
+        <div class="timer-track">
+          <div class="timer-fill" id="timer-fill"></div>
+        </div>
+        <div class="timer-num" id="timer-display">05:00</div>
+      </div>
+    </div>
+
+    <!-- QR -->
+    <div class="mc-panel dark" style="animation-delay:.14s;padding:20px;">
+      <div class="qr-inner">
+        <div class="bank-tag">
+          <div class="bank-chip" id="bank-label">MB</div>
+          VIETQR — QUÉT BẰNG APP NGÂN HÀNG
+        </div>
+        <div class="qr-frame">
+          <div class="scan-line"></div>
+          <img id="qr-image" src="" alt="QR Code MeariMC" width="180" height="180">
+        </div>
+        <div class="qr-hint">
+          Mở app ngân hàng &#9658; Quét mã &#9658; Xác nhận<br>
+          Xu được cộng tự động sau 1–2 phút
         </div>
       </div>
     </div>
 
-    <!-- timer -->
-    <div class="timer-row">
-      <span>Hết hạn sau</span>
-      <div class="timer-bar-wrap">
-        <div class="timer-bar" id="timer-bar"></div>
+    <!-- INFO ROWS -->
+    <div class="mc-panel dark info-rows" style="padding:0;animation-delay:.18s">
+      <div class="irow">
+        <div class="ikey">NGÂN HÀNG</div>
+        <div class="ival" id="bank-name-text">MB Bank</div>
       </div>
-      <span class="timer-value" id="timer-display">05:00</span>
-    </div>
-
-    <!-- QR code -->
-    <div class="qr-wrap">
-      <div class="qr-bank-tag">
-        <div class="bank-icon" id="bank-label">MB</div>
-        VietQR — Quét bằng app ngân hàng
+      <div class="irow">
+        <div class="ikey">SỐ TK</div>
+        <div class="ival" id="account-text">—</div>
+        <button class="mc-btn" onclick="copyField('account-text',this)">COPY</button>
       </div>
-      <div class="qr-img-frame">
-        <img id="qr-image" src="" alt="QR Code thanh toán" width="200" height="200">
-      </div>
-      <p class="qr-hint">Mở ứng dụng ngân hàng → Quét mã → Xác nhận</p>
-    </div>
-
-    <!-- info rows -->
-    <div class="info-grid">
-      <div class="info-row">
-        <span class="info-key">Ngân hàng</span>
-        <span class="info-val" id="bank-name-text">MB Bank</span>
-      </div>
-      <div class="info-row">
-        <span class="info-key">Số tài khoản</span>
-        <span class="info-val" id="account-text">—</span>
-        <button class="copy-btn" onclick="copyText('account-text', this)">Sao chép</button>
-      </div>
-      <div class="info-row">
-        <span class="info-key">Nội dung CK</span>
-        <span class="info-val" id="info-text">—</span>
-        <button class="copy-btn" onclick="copyText('info-text', this)">Sao chép</button>
+      <div class="irow">
+        <div class="ikey">NỘI DUNG CK</div>
+        <div class="ival" id="info-text">—</div>
+        <button class="mc-btn" onclick="copyField('info-text',this)">COPY</button>
       </div>
     </div>
 
-    <!-- notice -->
-    <div class="notice">
-      <div class="notice-icon">⚠</div>
-      <p>
-        <b>Không thay đổi nội dung chuyển khoản!</b><br>
-        Hệ thống sẽ tự động xác nhận và cộng Xu vào tài khoản trong vòng 1–2 phút sau khi giao dịch thành công.
-      </p>
+    <!-- WARNING -->
+    <div class="mc-panel" style="background:#2a1a00;border-color:var(--gold) #4a2a00 #4a2a00 var(--gold);animation-delay:.22s">
+      <div class="warn-inner">
+        <div class="tnt">&#128165;</div>
+        <div class="warn-txt">
+          <strong>KHÔNG THAY ĐỔI NỘI DUNG CHUYỂN KHOẢN!</strong><br>
+          Bot sẽ không nhận giao dịch nếu sai nội dung.<br>
+          Xu cộng tự động sau khi chuyển khoản thành công.
+        </div>
+      </div>
     </div>
 
-    <!-- footer -->
-    <div class="card-footer">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <rect x="1" y="5" width="8" height="6" rx="1.5" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="1"/>
-        <path d="M3 5V3.5a3 3 0 016 0V5" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round"/>
-      </svg>
-      Kết nối được mã hóa SSL/TLS
-      <span class="sep">·</span>
-      Dữ liệu bảo mật 256-bit
+    <!-- FOOTER -->
+    <div class="mc-panel dark card-foot" style="animation-delay:.26s">
+      &#9632; SSL/TLS ENCRYPTED &nbsp;|&nbsp; &#9632; 256-BIT SECURE &nbsp;|&nbsp; MeariMC 2025
     </div>
 
   </div>
-</div>
 
-<div class="bottom-note">
-  Gặp sự cố?
-  <a href="#">Liên hệ hỗ trợ</a>
+  <div class="btm">
+    Cần hỗ trợ? &nbsp;<a href="#">Liên hệ Admin MeariMC</a>
+  </div>
+
 </div>
 
 <script>
   const BANK_ID    = "MB";
   const ACCOUNT_NO = "0968781641";
-  const BANK_NAMES = { MB:"MB Bank", VCB:"Vietcombank", TCB:"Techcombank", VTB:"Vietinbank", BIDV:"BIDV", ACB:"ACB", TPB:"TPBank", VPB:"VPBank", MSB:"MSBank", OCB:"OCB" };
+  const BANKS = { MB:"MB Bank", VCB:"Vietcombank", TCB:"Techcombank", VTB:"Vietinbank", BIDV:"BIDV", ACB:"ACB Bank", TPB:"TPBank", VPB:"VPBank" };
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const amount    = urlParams.get('amount');
-  const addInfo   = urlParams.get('addInfo');
+  const p       = new URLSearchParams(window.location.search);
+  const amount  = p.get('amount');
+  const addInfo = p.get('addInfo');
 
   if (amount && addInfo) {
     document.getElementById('amount-text').textContent    = parseInt(amount).toLocaleString('vi-VN');
     document.getElementById('info-text').textContent      = addInfo;
     document.getElementById('account-text').textContent   = ACCOUNT_NO;
     document.getElementById('bank-label').textContent     = BANK_ID;
-    document.getElementById('bank-name-text').textContent = BANK_NAMES[BANK_ID] || BANK_ID;
-
-    const qr = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact.png?amount=${amount}&addInfo=${encodeURIComponent(addInfo)}`;
-    document.getElementById('qr-image').src = qr;
-
-    startTimer(5 * 60);
+    document.getElementById('bank-name-text').textContent = BANKS[BANK_ID] || BANK_ID;
+    document.getElementById('qr-image').src =
+      `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact.png?amount=${amount}&addInfo=${encodeURIComponent(addInfo)}`;
+    startTimer(300);
   } else {
     document.getElementById('payment-content').style.display = 'none';
-    const err = document.getElementById('error-state');
-    err.style.display = 'flex';
+    document.getElementById('error-state').style.display = 'flex';
   }
 
-  function startTimer(seconds) {
-    const display = document.getElementById('timer-display');
-    const bar     = document.getElementById('timer-bar');
-    const total   = seconds;
-    bar.style.animation = `shrink ${total}s linear forwards`;
-
+  function startTimer(left) {
+    const disp = document.getElementById('timer-display');
+    const fill = document.getElementById('timer-fill');
     const iv = setInterval(() => {
-      seconds--;
-      if (seconds <= 0) { clearInterval(iv); display.textContent = '00:00'; display.classList.add('urgent'); return; }
-      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-      const s = String(seconds % 60).padStart(2, '0');
-      display.textContent = `${m}:${s}`;
-      if (seconds <= 60) display.classList.add('urgent');
+      left--;
+      if (left <= 0) { clearInterval(iv); disp.textContent='00:00'; disp.classList.add('urgent'); fill.classList.add('urgent'); return; }
+      const m = String(Math.floor(left/60)).padStart(2,'0');
+      const s = String(left%60).padStart(2,'0');
+      disp.textContent = m+':'+s;
+      if (left <= 60) { disp.classList.add('urgent'); fill.classList.add('urgent'); }
     }, 1000);
   }
 
-  function copyText(id, btn) {
-    const txt = document.getElementById(id).textContent;
-    navigator.clipboard.writeText(txt).then(() => {
-      btn.textContent = '✓ Đã sao chép';
+  function copyField(id, btn) {
+    navigator.clipboard.writeText(document.getElementById(id).textContent.trim()).then(() => {
+      btn.textContent = '✓ OK';
       btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = 'Sao chép'; btn.classList.remove('copied'); }, 2000);
+      setTimeout(() => { btn.textContent='COPY'; btn.classList.remove('copied'); }, 2000);
     });
+  }
+
+  /* falling pixel blocks */
+  const colors = ['#5d9e38','#8b6340','#808080','#3b5ea6','#f5c518','#17c93c'];
+  const bg = document.getElementById('blocks-bg');
+  for (let i = 0; i < 20; i++) {
+    const b = document.createElement('div');
+    b.className = 'fall-block';
+    const sz = [8,12,16][i%3];
+    b.style.cssText = `left:${Math.random()*100}%;width:${sz}px;height:${sz}px;`
+      + `background:${colors[i%colors.length]};`
+      + `animation-duration:${9+Math.random()*18}s;animation-delay:-${Math.random()*22}s;`;
+    bg.appendChild(b);
   }
 </script>
 </body>
