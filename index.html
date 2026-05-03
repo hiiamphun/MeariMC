@@ -1157,6 +1157,286 @@ body {
 }
 
 /* ═══════════════════════════════
+   SUCCESS STATE
+═══════════════════════════════ */
+.chip-success {
+  background: #082010;
+  border-color: #2a8a3a #041008 #041008 #2a8a3a;
+  color: var(--emerald);
+  animation: successChipGlow 1.5s ease-in-out infinite alternate;
+}
+@keyframes successChipGlow {
+  from { box-shadow: 0 0 0 rgba(23,201,60,0); }
+  to   { box-shadow: 0 0 12px rgba(23,201,60,.3), inset 0 0 8px rgba(23,201,60,.15); }
+}
+.chip-dot-emerald { background: var(--emerald); animation: none; box-shadow: 0 0 6px var(--emerald); }
+
+#success-panel { display: none; animation: panelIn .4s ease both; }
+#success-panel.show { display: block; }
+
+.success-inner {
+  padding: 28px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  position: relative;
+  background: radial-gradient(circle at 50% 30%, rgba(23,201,60,.08), transparent 60%);
+}
+.success-emerald-big {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  animation:
+    successPop .55s cubic-bezier(0.5, 1.8, 0.4, 1.2) both,
+    successFloat 2.6s ease-in-out .55s infinite;
+  filter:
+    drop-shadow(0 4px 0 rgba(0,0,0,.5))
+    drop-shadow(0 0 20px rgba(23,201,60,.6));
+}
+@keyframes successPop {
+  0%   { transform: scale(0) rotate(-180deg); }
+  60%  { transform: scale(1.2) rotate(20deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes successFloat {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -6px; }
+}
+
+.success-rays {
+  position: absolute;
+  top: 28px; left: 50%;
+  width: 140px; height: 140px;
+  margin-left: -70px;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(255,255,150,.12) 0deg 15deg,
+      transparent 15deg 30deg,
+      rgba(255,255,150,.12) 30deg 45deg,
+      transparent 45deg 60deg,
+      rgba(255,255,150,.12) 60deg 75deg,
+      transparent 75deg 90deg,
+      rgba(255,255,150,.12) 90deg 105deg,
+      transparent 105deg 120deg,
+      rgba(255,255,150,.12) 120deg 135deg,
+      transparent 135deg 150deg,
+      rgba(255,255,150,.12) 150deg 165deg,
+      transparent 165deg 180deg,
+      rgba(255,255,150,.12) 180deg 195deg,
+      transparent 195deg 210deg,
+      rgba(255,255,150,.12) 210deg 225deg,
+      transparent 225deg 240deg,
+      rgba(255,255,150,.12) 240deg 255deg,
+      transparent 255deg 270deg,
+      rgba(255,255,150,.12) 270deg 285deg,
+      transparent 285deg 300deg,
+      rgba(255,255,150,.12) 300deg 315deg,
+      transparent 315deg 330deg,
+      rgba(255,255,150,.12) 330deg 345deg,
+      transparent 345deg 360deg
+    );
+  border-radius: 50%;
+  animation: raysSpin 8s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes raysSpin { to { transform: rotate(360deg); } }
+
+.success-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+.success-title {
+  font-size: 14px;
+  color: var(--emerald);
+  text-shadow: 2px 2px 0 #002a10, 3px 3px 0 rgba(0,0,0,.5);
+  line-height: 1.6;
+  letter-spacing: 1.5px;
+}
+.success-amount-row {
+  display: flex; align-items: center; gap: 8px;
+  background: #082010;
+  border: 2px solid;
+  border-color: #2a6a3a #041a0e #041a0e #2a6a3a;
+  padding: 8px 14px;
+}
+.success-amount-row .gold-amount {
+  font-size: 16px;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--gold-dark);
+}
+.success-amount-row .vnd-tag {
+  font-size: 6px;
+  color: var(--gold-dark);
+  text-shadow: 1px 1px 0 #000;
+  align-self: flex-end;
+  margin-bottom: 1px;
+}
+.success-sub {
+  font-size: 7px;
+  color: #aaa;
+  text-shadow: 1px 1px 0 #000;
+  line-height: 2;
+}
+.success-sub b { color: var(--emerald); }
+
+.success-tx-id {
+  font-size: 5px;
+  color: #555;
+  text-shadow: 1px 1px 0 #000;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.success-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.success-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  padding: 9px 14px;
+  border: 2px solid;
+  cursor: pointer;
+  text-shadow: 1px 1px 0 #000;
+  letter-spacing: 1px;
+}
+.success-btn-primary {
+  background: #0a8025;
+  border-color: #1ed64a #042a10 #042a10 #1ed64a;
+  color: #fff;
+}
+.success-btn-primary:hover { background: #17c93c; }
+.success-btn-primary:active { transform: translate(1px,1px); }
+.success-btn-secondary {
+  background: #1a1a1a;
+  border-color: #444 #0a0a0a #0a0a0a #444;
+  color: #aaa;
+}
+.success-btn-secondary:hover { background: #222; color: #ddd; }
+
+/* Step 3 done state */
+.step-node.success-done .step-box {
+  background: #0a2a14;
+  border-color: #2a6a3a #041a0e #041a0e #2a6a3a;
+  color: var(--emerald);
+  text-shadow: 0 0 8px var(--em-glow);
+  animation: stepPop .4s cubic-bezier(0.5, 1.6, 0.4, 1) both;
+}
+.step-node.success-done .step-label { color: var(--emerald); }
+@keyframes stepPop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+/* Achievement banner */
+.achievement {
+  position: fixed;
+  top: 78px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-220%);
+  z-index: 200;
+  background: linear-gradient(180deg, #1a1408 0%, #2a2010 100%);
+  border: 3px solid;
+  border-color: #f5c518 #5a4000 #5a4000 #f5c518;
+  outline: 3px solid #000;
+  outline-offset: -1px;
+  padding: 12px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 320px;
+  max-width: 92vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,.7);
+  transition: transform .55s cubic-bezier(0.5, 1.4, 0.4, 1);
+  pointer-events: none;
+}
+.achievement::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(180deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+.achievement.show { transform: translateX(-50%) translateY(0); }
+.achievement-icon-wrap {
+  flex-shrink: 0;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: #000;
+  border: 2px solid #5a4000;
+}
+.achievement-icon {
+  width: 32px; height: 32px;
+  image-rendering: pixelated;
+}
+.achievement-text {}
+.achievement-label {
+  font-size: 6px;
+  color: var(--gold);
+  text-shadow: 1px 1px 0 #000;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+.achievement-name {
+  font-size: 8px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  line-height: 1.5;
+}
+
+/* Emerald rain particles */
+.emerald-rain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 150;
+  overflow: hidden;
+}
+.emerald-drop {
+  position: absolute;
+  top: -30px;
+  width: 18px;
+  height: 18px;
+  image-rendering: pixelated;
+  animation: emeraldFall linear forwards;
+}
+@keyframes emeraldFall {
+  0%   { transform: translateY(-30px) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+}
+
+/* Test button (demo) */
+.test-btn {
+  position: fixed;
+  bottom: 14px;
+  right: 14px;
+  z-index: 110;
+  background: #1a1a1a;
+  border: 2px solid;
+  border-color: #5a4000 #1a1000 #1a1000 #5a4000;
+  padding: 9px 14px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  color: var(--gold);
+  text-shadow: 1px 1px 0 #000;
+  cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.6);
+}
+.test-btn:hover { background: #2a2010; color: #ffe060; }
+.test-btn:active { transform: translate(1px,1px); }
+.test-btn.hidden { display: none; }
+
+/* Dim QR/timer panels when success shown */
+.dimmed { opacity: .25; pointer-events: none; transition: opacity .4s; }
+
+/* ═══════════════════════════════
    RESPONSIVE
 ═══════════════════════════════ */
 @media (max-width: 480px) {
@@ -1664,27 +1944,27 @@ body {
       </div>
       <div class="steps-inner">
         <div class="steps-row">
-          <div class="step-node done">
+          <div class="step-node done" id="step1">
             <div class="step-box">&#10003;</div>
             <div class="step-label">TẠO LỆNH</div>
           </div>
-          <div class="step-line done"></div>
-          <div class="step-node active">
-            <div class="step-box">2</div>
+          <div class="step-line done" id="line1"></div>
+          <div class="step-node active" id="step2">
+            <div class="step-box" id="step2-box">2</div>
             <div class="step-label">THANH TOÁN</div>
           </div>
-          <div class="step-line"></div>
-          <div class="step-node">
-            <div class="step-box">3</div>
+          <div class="step-line" id="line2"></div>
+          <div class="step-node" id="step3">
+            <div class="step-box" id="step3-box">3</div>
             <div class="step-label">NHẬN XU</div>
           </div>
         </div>
         <div>
           <div class="xp-bar-label">
-            <span>&#9658; ĐANG THỰC HIỆN BƯỚC 2/3</span>
+            <span id="xp-label">&#9658; ĐANG THỰC HIỆN BƯỚC 2/3</span>
             <span>XP +250</span>
           </div>
-          <div class="xp-track"><div class="xp-fill"></div></div>
+          <div class="xp-track"><div class="xp-fill" id="xp-fill"></div></div>
         </div>
       </div>
     </div>
@@ -1716,16 +1996,16 @@ body {
           </div>
         </div>
         <div class="status-chip">
-          <div class="chip chip-wait">
-            <div class="chip-dot chip-dot-gold"></div>
-            CHỜ THANH TOÁN
+          <div class="chip chip-wait" id="status-chip">
+            <div class="chip-dot chip-dot-gold" id="status-dot"></div>
+            <span id="status-text">CHỜ THANH TOÁN</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- TIMER -->
-    <div class="panel" style="animation-delay:.12s">
+    <div class="panel" id="timer-panel" style="animation-delay:.12s">
       <div class="timer-inner">
         <div class="timer-icon">&#9201;</div>
         <div class="timer-label">THỜI GIAN<br>HẾT HẠN</div>
@@ -1743,7 +2023,7 @@ body {
     </div>
 
     <!-- QR CODE -->
-    <div class="panel" style="animation-delay:.16s">
+    <div class="panel" id="qr-panel" style="animation-delay:.16s">
       <div class="panel-header">
         <svg class="panel-header-gem" viewBox="0 0 8 8"><rect x="3" y="0" width="2" height="1" fill="#f5c518"/><rect x="0" y="2" width="8" height="1" fill="#f5c518"/><rect x="1" y="3" width="6" height="3" fill="#fff060"/><rect x="2" y="6" width="4" height="1" fill="#f5c518"/><rect x="3" y="7" width="2" height="1" fill="#a07800"/></svg>
         MÃ QR THANH TOÁN
@@ -1772,6 +2052,66 @@ body {
           <span>XÁC NHẬN</span>
           <span class="hint-arrow">&#9658;</span>
           <span>NHẬN XU</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS PANEL (hidden by default, shown on transaction success) -->
+    <div class="panel" id="success-panel" style="animation-delay:.16s">
+      <div class="panel-header">
+        <svg class="panel-header-gem" viewBox="0 0 8 8"><rect x="3" y="0" width="2" height="1" fill="#17c93c"/><rect x="0" y="2" width="8" height="1" fill="#17c93c"/><rect x="1" y="3" width="6" height="3" fill="#5effa0"/><rect x="2" y="6" width="4" height="1" fill="#17c93c"/><rect x="3" y="7" width="2" height="1" fill="#075518"/></svg>
+        GIAO DỊCH THÀNH CÔNG
+      </div>
+      <div class="success-inner">
+        <div class="success-rays"></div>
+        <div class="success-content">
+          <!-- Big emerald -->
+          <svg class="success-emerald-big" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <rect x="5" y="0" width="6" height="2" fill="#17c93c"/>
+            <rect x="3" y="2" width="2" height="2" fill="#17c93c"/>
+            <rect x="11" y="2" width="2" height="2" fill="#17c93c"/>
+            <rect x="2" y="4" width="1" height="3" fill="#0da02e"/>
+            <rect x="13" y="4" width="1" height="3" fill="#0da02e"/>
+            <rect x="2" y="6" width="12" height="1" fill="#17c93c"/>
+            <rect x="3" y="7" width="10" height="3" fill="#5effa0"/>
+            <rect x="6" y="7" width="3" height="2" fill="#a0ffd0"/>
+            <rect x="4" y="10" width="8" height="2" fill="#17c93c"/>
+            <rect x="5" y="12" width="6" height="2" fill="#0da02e"/>
+            <rect x="6" y="14" width="4" height="2" fill="#075518"/>
+          </svg>
+
+          <div class="success-title">&#10003; THÀNH CÔNG!</div>
+
+          <div class="success-amount-row">
+            <svg class="emerald-gem" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="0" width="6" height="2" fill="#17c93c"/>
+              <rect x="3" y="2" width="2" height="2" fill="#17c93c"/>
+              <rect x="11" y="2" width="2" height="2" fill="#17c93c"/>
+              <rect x="2" y="6" width="12" height="1" fill="#17c93c"/>
+              <rect x="3" y="7" width="10" height="3" fill="#5effa0"/>
+              <rect x="4" y="10" width="8" height="2" fill="#17c93c"/>
+              <rect x="5" y="12" width="6" height="2" fill="#0da02e"/>
+              <rect x="6" y="14" width="4" height="2" fill="#075518"/>
+            </svg>
+            <span class="gold-amount" id="success-amount">—</span>
+            <span class="vnd-tag">VNĐ</span>
+          </div>
+
+          <div class="success-sub">
+            Xu đã được cộng vào tài khoản<br>
+            <b>&#9658; KIỂM TRA INVENTORY TRONG GAME &#9660;</b>
+          </div>
+
+          <div class="success-tx-id">TX-ID: <span id="success-txid">—</span></div>
+
+          <div class="success-actions">
+            <button class="success-btn success-btn-primary" onclick="window.close()">
+              &#10003; HOÀN TẤT
+            </button>
+            <button class="success-btn success-btn-secondary" onclick="resetDemo()">
+              &#8634; THỬ LẠI
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1859,6 +2199,36 @@ body {
 
 </div><!-- /.main -->
 
+<!-- ═══ ACHIEVEMENT BANNER (Minecraft-style) ═══ -->
+<div class="achievement" id="achievement">
+  <div class="achievement-icon-wrap">
+    <svg class="achievement-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <rect x="5" y="0" width="6" height="2" fill="#17c93c"/>
+      <rect x="3" y="2" width="2" height="2" fill="#17c93c"/>
+      <rect x="11" y="2" width="2" height="2" fill="#17c93c"/>
+      <rect x="2" y="4" width="1" height="3" fill="#0da02e"/>
+      <rect x="13" y="4" width="1" height="3" fill="#0da02e"/>
+      <rect x="2" y="6" width="12" height="1" fill="#17c93c"/>
+      <rect x="3" y="7" width="10" height="3" fill="#5effa0"/>
+      <rect x="4" y="10" width="8" height="2" fill="#17c93c"/>
+      <rect x="5" y="12" width="6" height="2" fill="#0da02e"/>
+      <rect x="6" y="14" width="4" height="2" fill="#075518"/>
+    </svg>
+  </div>
+  <div class="achievement-text">
+    <div class="achievement-label">THÀNH TỰU MỞ KHÓA!</div>
+    <div class="achievement-name">Nạp Xu Thành Công</div>
+  </div>
+</div>
+
+<!-- ═══ EMERALD RAIN ═══ -->
+<div class="emerald-rain" id="emerald-rain"></div>
+
+<!-- ═══ TEST BUTTON (demo only) ═══ -->
+<button class="test-btn" id="test-btn" onclick="markSuccess()">
+  &#9658; TEST: GIAO DỊCH OK
+</button>
+
 <script>
 const BANK_ID    = "MB";
 const ACCOUNT_NO = "0968781641";
@@ -1889,15 +2259,19 @@ if (true) {
   startTimer(300);
 }
 
+let timerInterval = null;
+let successTriggered = false;
+
 function startTimer(total) {
   let left = total;
   const disp = document.getElementById('timer-display');
   const fill = document.getElementById('timer-fill');
 
-  const iv = setInterval(() => {
+  timerInterval = setInterval(() => {
+    if (successTriggered) return;
     left--;
     if (left <= 0) {
-      clearInterval(iv);
+      clearInterval(timerInterval);
       disp.textContent = '00:00';
       disp.classList.add('danger');
       fill.classList.add('danger');
@@ -1911,6 +2285,134 @@ function startTimer(total) {
       fill.classList.add('danger');
     }
   }, 1000);
+}
+
+/* ═══════════════════════════════
+   TRANSACTION SUCCESS HANDLER
+═══════════════════════════════ */
+function markSuccess() {
+  if (successTriggered) return;
+  successTriggered = true;
+
+  // Stop timer
+  if (timerInterval) clearInterval(timerInterval);
+
+  // ─ Update steps: step 2 done, step 3 active → done ─
+  const step2     = document.getElementById('step2');
+  const step2Box  = document.getElementById('step2-box');
+  const line2     = document.getElementById('line2');
+  const step3     = document.getElementById('step3');
+  const step3Box  = document.getElementById('step3-box');
+  const xpLabel   = document.getElementById('xp-label');
+  const xpFill    = document.getElementById('xp-fill');
+
+  // Step 2: active → done
+  step2.classList.remove('active');
+  step2.classList.add('done');
+  step2Box.innerHTML = '&#10003;';
+
+  // Animate line 2 fill, then activate step 3
+  setTimeout(() => {
+    line2.classList.add('done');
+  }, 250);
+
+  setTimeout(() => {
+    step3.classList.add('success-done');
+    step3Box.innerHTML = '&#10003;';
+    xpLabel.innerHTML = '&#9658; HOÀN TẤT! BƯỚC 3/3';
+    xpFill.style.width = '100%';
+    xpFill.style.transition = 'width .8s ease';
+  }, 600);
+
+  // ─ Update status chip: waiting → success ─
+  const chip      = document.getElementById('status-chip');
+  const dot       = document.getElementById('status-dot');
+  const statusTxt = document.getElementById('status-text');
+  chip.classList.remove('chip-wait');
+  chip.classList.add('chip-success');
+  dot.classList.remove('chip-dot-gold');
+  dot.classList.add('chip-dot-emerald');
+  statusTxt.textContent = 'THÀNH CÔNG';
+
+  // ─ Dim QR + timer panels ─
+  document.getElementById('qr-panel').classList.add('dimmed');
+  document.getElementById('timer-panel').classList.add('dimmed');
+
+  // ─ Show success panel ─
+  setTimeout(() => {
+    const sp = document.getElementById('success-panel');
+    sp.classList.add('show');
+
+    // Fill success amount + tx-id
+    document.getElementById('success-amount').textContent =
+      document.getElementById('amount-text').textContent;
+    document.getElementById('success-txid').textContent = generateTxId();
+
+    sp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 800);
+
+  // ─ Achievement banner ─
+  setTimeout(() => {
+    const ach = document.getElementById('achievement');
+    ach.classList.add('show');
+    setTimeout(() => ach.classList.remove('show'), 4500);
+  }, 400);
+
+  // ─ Emerald rain particles ─
+  spawnEmeraldRain();
+
+  // ─ Hide test button ─
+  document.getElementById('test-btn').classList.add('hidden');
+}
+
+function generateTxId() {
+  const chars = 'ABCDEF0123456789';
+  let id = 'MC-';
+  for (let i = 0; i < 12; i++) {
+    id += chars[Math.floor(Math.random() * chars.length)];
+    if (i === 3 || i === 7) id += '-';
+  }
+  return id;
+}
+
+function spawnEmeraldRain() {
+  const container = document.getElementById('emerald-rain');
+  const EMERALD_SVG =
+    '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;width:100%;height:100%">'
+    + '<rect x="5" y="0" width="6" height="2" fill="#17c93c"/>'
+    + '<rect x="3" y="2" width="2" height="2" fill="#17c93c"/>'
+    + '<rect x="11" y="2" width="2" height="2" fill="#17c93c"/>'
+    + '<rect x="2" y="6" width="12" height="1" fill="#17c93c"/>'
+    + '<rect x="3" y="7" width="10" height="3" fill="#5effa0"/>'
+    + '<rect x="4" y="10" width="8" height="2" fill="#17c93c"/>'
+    + '<rect x="5" y="12" width="6" height="2" fill="#0da02e"/>'
+    + '<rect x="6" y="14" width="4" height="2" fill="#075518"/>'
+    + '</svg>';
+
+  for (let i = 0; i < 36; i++) {
+    setTimeout(() => {
+      const drop = document.createElement('div');
+      drop.className = 'emerald-drop';
+      const sz  = 12 + Math.random() * 12;
+      const dur = 1.8 + Math.random() * 1.6;
+      drop.style.left = (Math.random() * 100) + '%';
+      drop.style.width = sz + 'px';
+      drop.style.height = sz + 'px';
+      drop.style.animationDuration = dur + 's';
+      drop.innerHTML = EMERALD_SVG;
+      container.appendChild(drop);
+      setTimeout(() => drop.remove(), dur * 1000 + 100);
+    }, i * 80);
+  }
+}
+
+function resetDemo() {
+  location.reload();
+}
+
+// Auto-trigger success if URL has ?success=1
+if (new URLSearchParams(window.location.search).get('success') === '1') {
+  setTimeout(markSuccess, 1200);
 }
 
 function copyField(id, btn) {
