@@ -1,100 +1,757 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cổng Thanh Toán Nạp Thẻ</title>
-    <style>
-        /* Trang trí giao diện */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f3f4f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: #333;
-        }
-        .card {
-            background-color: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        h2 { color: #2563eb; margin-top: 0; font-size: 24px; }
-        .qr-box {
-            border: 2px dashed #3b82f6;
-            border-radius: 12px;
-            padding: 15px;
-            background-color: #eff6ff;
-            margin: 20px 0;
-        }
-        .qr-box img {
-            max-width: 100%;
-            border-radius: 8px;
-        }
-        .info-text { font-size: 16px; margin: 10px 0; }
-        .highlight { font-weight: bold; color: #dc2626; font-size: 18px; }
-        .footer { font-size: 13px; color: #6b7280; margin-top: 20px; }
-        .error { color: #dc2626; font-weight: bold; display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thanh Toán — Nạp Thẻ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0b0f1a;
+    --surface:   #111827;
+    --surface2:  #1a2235;
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(255,255,255,0.14);
+    --blue:      #3b82f6;
+    --blue-glow: rgba(59,130,246,0.25);
+    --teal:      #06b6d4;
+    --green:     #22c55e;
+    --red:       #ef4444;
+    --text:      #f1f5f9;
+    --muted:     #94a3b8;
+    --dim:       #475569;
+    --radius:    16px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* glowing blob */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(59,130,246,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ─── header bar ─── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: rgba(11,15,26,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 10;
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.3px;
+  }
+
+  .topbar-brand .dot {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--blue), var(--teal));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .topbar-brand .dot svg { width: 14px; height: 14px; }
+
+  .secure-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 500;
+  }
+
+  .secure-badge .lock-icon {
+    width: 14px; height: 14px;
+  }
+
+  /* ─── main card ─── */
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 440px;
+    padding: 32px;
+    margin-top: 56px;
+    animation: cardIn 0.5s ease both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── steps ─── */
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 28px;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.3s;
+  }
+
+  .step.active .step-num {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+    box-shadow: 0 0 0 4px var(--blue-glow);
+  }
+
+  .step.done .step-num {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+
+  .step-label {
+    font-size: 11px;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+  .step.active .step-label { color: var(--blue); }
+  .step.done  .step-label { color: var(--green); }
+
+  .step-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+    min-width: 28px;
+    max-width: 48px;
+    margin-bottom: 18px;
+  }
+
+  /* ─── amount block ─── */
+  .amount-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: cardIn 0.5s 0.1s ease both;
+  }
+
+  .amount-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .amount-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -1px;
+  }
+
+  .amount-currency {
+    font-size: 14px;
+    color: var(--muted);
+    margin-left: 4px;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-weight: 400;
+  }
+
+  .amount-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .status-pill.waiting {
+    background: rgba(234,179,8,0.12);
+    color: #eab308;
+    border: 1px solid rgba(234,179,8,0.2);
+  }
+
+  .status-pill .pulse-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #eab308;
+    animation: pulse 1.5s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* ─── timer ─── */
+  .timer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--dim);
+    margin-bottom: 20px;
+    padding: 0 2px;
+    animation: cardIn 0.5s 0.15s ease both;
+  }
+
+  .timer-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .timer-value.urgent { color: var(--red); }
+
+  .timer-bar-wrap {
+    flex: 1;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 99px;
+    margin: 0 12px;
+    overflow: hidden;
+  }
+
+  .timer-bar {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--blue), var(--teal));
+    width: 100%;
+    transform-origin: left;
+    animation: shrink 300s linear forwards;
+  }
+
+  @keyframes shrink {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+  }
+
+  /* ─── QR wrapper ─── */
+  .qr-wrap {
+    position: relative;
+    border-radius: var(--radius);
+    padding: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    animation: cardIn 0.5s 0.2s ease both;
+    overflow: hidden;
+  }
+
+  /* corner accents */
+  .qr-wrap::before,
+  .qr-wrap::after {
+    content: '';
+    position: absolute;
+    width: 40px; height: 40px;
+    border-color: var(--blue);
+    border-style: solid;
+  }
+  .qr-wrap::before {
+    top: 10px; left: 10px;
+    border-width: 2px 0 0 2px;
+    border-radius: 4px 0 0 0;
+  }
+  .qr-wrap::after {
+    bottom: 10px; right: 10px;
+    border-width: 0 2px 2px 0;
+    border-radius: 0 0 4px 0;
+  }
+
+  .qr-bank-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue);
+    letter-spacing: 0.4px;
+  }
+
+  .qr-bank-tag .bank-icon {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    background: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .qr-img-frame {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px var(--border2), 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .qr-img-frame img {
+    display: block;
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+  }
+
+  /* scan line animation */
+  .qr-img-frame::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    animation: scan 2.5s ease-in-out infinite;
+    top: 0;
+  }
+
+  @keyframes scan {
+    0%   { top: 0%; opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  .qr-hint {
+    font-size: 12px;
+    color: var(--dim);
+    text-align: center;
+  }
+
+  /* ─── info rows ─── */
+  .info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-bottom: 20px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    animation: cardIn 0.5s 0.25s ease both;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .info-key {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .info-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+    text-align: right;
+    word-break: break-all;
+  }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--muted);
+    padding: 3px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    flex-shrink: 0;
+  }
+
+  .copy-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+  .copy-btn.copied {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* ─── notice ─── */
+  .notice {
+    display: flex;
+    gap: 10px;
+    background: rgba(234,179,8,0.06);
+    border: 1px solid rgba(234,179,8,0.15);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 24px;
+    animation: cardIn 0.5s 0.3s ease both;
+  }
+
+  .notice-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #eab308;
+  }
+
+  .notice p {
+    font-size: 12px;
+    color: #ca8a04;
+    line-height: 1.6;
+  }
+
+  .notice p b {
+    color: #eab308;
+    font-weight: 600;
+  }
+
+  /* ─── footer inside card ─── */
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--dim);
+    animation: cardIn 0.5s 0.35s ease both;
+  }
+
+  .card-footer .sep { opacity: 0.4; }
+
+  /* ─── error state ─── */
+  .error-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    text-align: center;
+  }
+
+  .error-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .error-state h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .error-state p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ─── branding below card ─── */
+  .bottom-note {
+    margin-top: 20px;
+    font-size: 11px;
+    color: var(--dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: cardIn 0.5s 0.4s ease both;
+  }
+
+  .bottom-note a { color: var(--blue); text-decoration: none; }
+
+  @media (max-width: 480px) {
+    .card { padding: 24px 20px; }
+    .amount-value { font-size: 22px; }
+  }
+</style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>Thanh Toán Nạp Thẻ</h2>
-        
-        <div id="error-msg" class="error">
-            Không tìm thấy thông tin giao dịch. Vui lòng tạo lại mã trong game!
-        </div>
+<!-- topbar -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="dot">
+      <svg viewBox="0 0 14 14" fill="none">
+        <path d="M7 1L12.196 4V10L7 13L1.804 10V4L7 1Z" fill="white" fill-opacity="0.9"/>
+      </svg>
+    </div>
+    Cổng Thanh Toán
+  </div>
+  <div class="secure-badge">
+    <svg class="lock-icon" viewBox="0 0 16 16" fill="none">
+      <rect x="3" y="7" width="10" height="8" rx="2" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="1.2"/>
+      <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    </svg>
+    Kết nối bảo mật
+  </div>
+</header>
 
-        <div id="payment-content">
-            <p class="info-text">Sử dụng App Ngân Hàng để quét mã</p>
-            
-            <div class="qr-box">
-                <img id="qr-image" src="" alt="Đang tải mã QR...">
-            </div>
+<!-- main card -->
+<div class="card">
 
-            <p class="info-text">Số tiền: <span id="amount-text" class="highlight">0</span> VNĐ</p>
-            <p class="info-text">Nội dung: <span id="info-text" class="highlight">...</span></p>
-            
-            <p class="footer">
-                Hệ thống sẽ tự động cộng Xu vào game sau 1-2 phút.<br>
-                <b>Lưu ý:</b> Không sửa nội dung chuyển khoản!
-            </p>
+  <!-- steps -->
+  <div class="steps">
+    <div class="step done">
+      <div class="step-num">✓</div>
+      <div class="step-label">Tạo lệnh</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step active">
+      <div class="step-num">2</div>
+      <div class="step-label">Thanh toán</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-label">Nhận Xu</div>
+    </div>
+  </div>
+
+  <!-- error state (hidden by default) -->
+  <div class="error-state" id="error-state">
+    <div class="error-icon">⚠</div>
+    <h3>Giao dịch không hợp lệ</h3>
+    <p>Không tìm thấy thông tin giao dịch.<br>Vui lòng tạo lại mã nạp thẻ trong game.</p>
+  </div>
+
+  <!-- payment content -->
+  <div id="payment-content">
+
+    <!-- amount -->
+    <div class="amount-block">
+      <div>
+        <div class="amount-label">Số tiền nạp</div>
+        <div class="amount-value">
+          <span id="amount-text">—</span><span class="amount-currency">đ</span>
         </div>
+      </div>
+      <div class="amount-status">
+        <div class="status-pill waiting">
+          <div class="pulse-dot"></div>
+          Chờ thanh toán
+        </div>
+      </div>
     </div>
 
-    <script>
-        // 1. Cấu hình ngân hàng của bạn (Giống trong config.yml)
-        const BANK_ID = "MB"; // Mã ngân hàng (VD: MB, VCB, Momo)
-        const ACCOUNT_NO = "0968781641"; // Số tài khoản của bạn
+    <!-- timer -->
+    <div class="timer-row">
+      <span>Hết hạn sau</span>
+      <div class="timer-bar-wrap">
+        <div class="timer-bar" id="timer-bar"></div>
+      </div>
+      <span class="timer-value" id="timer-display">05:00</span>
+    </div>
 
-        // 2. Lấy dữ liệu từ đường dẫn URL (ví dụ: ?amount=50000&addInfo=NAPCUCAI)
-        const urlParams = new URLSearchParams(window.location.search);
-        const amount = urlParams.get('amount');
-        const addInfo = urlParams.get('addInfo');
+    <!-- QR code -->
+    <div class="qr-wrap">
+      <div class="qr-bank-tag">
+        <div class="bank-icon" id="bank-label">MB</div>
+        VietQR — Quét bằng app ngân hàng
+      </div>
+      <div class="qr-img-frame">
+        <img id="qr-image" src="" alt="QR Code thanh toán" width="200" height="200">
+      </div>
+      <p class="qr-hint">Mở ứng dụng ngân hàng → Quét mã → Xác nhận</p>
+    </div>
 
-        // 3. Kiểm tra dữ liệu và hiển thị mã QR
-        if (amount && addInfo) {
-            // Hiển thị số tiền và nội dung bằng chữ
-            document.getElementById('amount-text').innerText = parseInt(amount).toLocaleString('vi-VN');
-            document.getElementById('info-text').innerText = addInfo;
+    <!-- info rows -->
+    <div class="info-grid">
+      <div class="info-row">
+        <span class="info-key">Ngân hàng</span>
+        <span class="info-val" id="bank-name-text">MB Bank</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Số tài khoản</span>
+        <span class="info-val" id="account-text">—</span>
+        <button class="copy-btn" onclick="copyText('account-text', this)">Sao chép</button>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Nội dung CK</span>
+        <span class="info-val" id="info-text">—</span>
+        <button class="copy-btn" onclick="copyText('info-text', this)">Sao chép</button>
+      </div>
+    </div>
 
-            // Tạo link ảnh VietQR
-            const qrApiUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact.png?amount=${amount}&addInfo=${addInfo}`;
-            
-            // Gắn ảnh vào giao diện
-            document.getElementById('qr-image').src = qrApiUrl;
-        } else {
-            // Nếu ai đó tự ý truy cập web mà không qua link trong game
-            document.getElementById('payment-content').style.display = 'none';
-            document.getElementById('error-msg').style.display = 'block';
-        }
-    </script>
+    <!-- notice -->
+    <div class="notice">
+      <div class="notice-icon">⚠</div>
+      <p>
+        <b>Không thay đổi nội dung chuyển khoản!</b><br>
+        Hệ thống sẽ tự động xác nhận và cộng Xu vào tài khoản trong vòng 1–2 phút sau khi giao dịch thành công.
+      </p>
+    </div>
+
+    <!-- footer -->
+    <div class="card-footer">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <rect x="1" y="5" width="8" height="6" rx="1.5" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="1"/>
+        <path d="M3 5V3.5a3 3 0 016 0V5" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round"/>
+      </svg>
+      Kết nối được mã hóa SSL/TLS
+      <span class="sep">·</span>
+      Dữ liệu bảo mật 256-bit
+    </div>
+
+  </div>
+</div>
+
+<div class="bottom-note">
+  Gặp sự cố?
+  <a href="#">Liên hệ hỗ trợ</a>
+</div>
+
+<script>
+  const BANK_ID    = "MB";
+  const ACCOUNT_NO = "0968781641";
+  const BANK_NAMES = { MB:"MB Bank", VCB:"Vietcombank", TCB:"Techcombank", VTB:"Vietinbank", BIDV:"BIDV", ACB:"ACB", TPB:"TPBank", VPB:"VPBank", MSB:"MSBank", OCB:"OCB" };
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const amount    = urlParams.get('amount');
+  const addInfo   = urlParams.get('addInfo');
+
+  if (amount && addInfo) {
+    document.getElementById('amount-text').textContent    = parseInt(amount).toLocaleString('vi-VN');
+    document.getElementById('info-text').textContent      = addInfo;
+    document.getElementById('account-text').textContent   = ACCOUNT_NO;
+    document.getElementById('bank-label').textContent     = BANK_ID;
+    document.getElementById('bank-name-text').textContent = BANK_NAMES[BANK_ID] || BANK_ID;
+
+    const qr = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact.png?amount=${amount}&addInfo=${encodeURIComponent(addInfo)}`;
+    document.getElementById('qr-image').src = qr;
+
+    startTimer(5 * 60);
+  } else {
+    document.getElementById('payment-content').style.display = 'none';
+    const err = document.getElementById('error-state');
+    err.style.display = 'flex';
+  }
+
+  function startTimer(seconds) {
+    const display = document.getElementById('timer-display');
+    const bar     = document.getElementById('timer-bar');
+    const total   = seconds;
+    bar.style.animation = `shrink ${total}s linear forwards`;
+
+    const iv = setInterval(() => {
+      seconds--;
+      if (seconds <= 0) { clearInterval(iv); display.textContent = '00:00'; display.classList.add('urgent'); return; }
+      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      display.textContent = `${m}:${s}`;
+      if (seconds <= 60) display.classList.add('urgent');
+    }, 1000);
+  }
+
+  function copyText(id, btn) {
+    const txt = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(txt).then(() => {
+      btn.textContent = '✓ Đã sao chép';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Sao chép'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
 </body>
 </html>
